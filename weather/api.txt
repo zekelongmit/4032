@@ -1,0 +1,169 @@
+// Sketch for using the darksky API
+// https://darksky.net/dev/docs
+// This sketch requires you to start a local server or run it on a server
+// See more about how to do that here:
+// https://github.com/processing/p5.js/wiki/Local-server
+
+var queryResult;
+
+function setup() {
+  createCanvas(320, 568);
+  background(140);
+query();
+}
+
+
+// Run the API call
+function query() {
+
+  // URL for querying
+  var url= 'https://api.darksky.net/forecast/10f387986cf9ddb5d2600e812e7e15d4/42.361936, -71.097309';
+
+  // Query the URL, set a callback
+  // 'jsonp' is needed for security
+  loadJSON(url, middle_step, 'jsonp');
+}
+
+function middle_step(data) {
+
+	  // console.log(data);
+  queryResult = data;
+
+  // only look at current results:
+  var current = queryResult.currently;
+  console.log(typeof(current.time)); // this shows that the current.time is in fact a "number" object
+  console.log(current.time); // to check the actual time
+  console.log(current.time+10); // using a number function becuase I did not believe the tyeof()
+	// URL for querying
+  var url= 'https://api.darksky.net/forecast/10f387986cf9ddb5d2600e812e7e15d4/42.361936, -71.097309, '+ toString(current.time); // I feel like this should work
+
+  // Query the URL, set a callback
+  // 'jsonp' is needed for security
+  loadJSON(url, gotData, 'jsonp');
+}
+
+// Request is completed
+function gotData(data) {
+
+  // console.log(data);
+  queryResult = data;
+
+  // only look at current results:
+  var current = queryResult.currently;
+  var minute = queryResult.minutely;
+  var day = queryResult.daily.data[0];
+
+
+  
+  // a few variables for text formatting
+  var xPos = width/2;  
+  var yPos = 5;
+  var yGap = 20; 
+  var textSizeLarge = 32;
+  var textSizeSmall = 12;
+
+  // List relevant items of information
+  fill(255);
+  textStyle(BOLD);
+  textAlign(CENTER);
+
+  var sunrise = new Date(day.sunriseTime*1000);
+  var sunset = new Date(day.sunsetTime*1000);
+  var time = new Date(current.time*1000);
+  textSize(textSizeLarge);
+  fill(color("#191970"));
+  rect(0,yPos,320, yPos+textSizeLarge);
+  fill(color('#87CEFA'));
+  rect(13*sunrise.getHours(),yPos,13*sunset.getHours()-13*sunrise.getHours(), yPos+textSizeLarge);
+  fill(255);
+  if(time.getTime()<sunrise.getTime() || time.getTime()>sunset.getTime()){
+  	fill(0);
+  	text("Night",xPos, yPos+27.5);
+  }
+  else{
+  	fill(255);
+  	text("Day",xPos, yPos+27.5);
+  }
+  yPos+=textSizeLarge;
+  yPos+=yGap;
+  yPos+= textSizeSmall;
+  
+
+  
+
+  // The location is not live data, just entered manually
+  textSize(textSizeLarge);
+  text("Cambridge",xPos, yPos);
+  yPos+=yGap;
+
+  textSize(textSizeSmall);
+  text("Weather",xPos, yPos);
+  yPos+=textSizeLarge;
+  textSize(textSizeLarge);
+  text(current.summary,xPos, yPos);
+  yPos+=yGap;
+  
+  textSize(textSizeSmall);
+  text("Temperature",xPos, yPos);
+  yPos+=textSizeLarge;
+  textSize(textSizeLarge);
+  text(current.apparentTemperature + "º",xPos, yPos);
+  yPos+=yGap;
+  
+  textSize(textSizeSmall);
+  text("Precipitation Chance",xPos, yPos);
+  yPos+=textSizeLarge;
+  textSize(textSizeLarge);
+  text(day.precipProbability*100 + "%",xPos, yPos);
+  yPos+=yGap;
+  
+  textSize(textSizeSmall);
+  text("Humidity",xPos, yPos);
+  yPos+=textSizeLarge;
+  textSize(textSizeLarge);
+  text(current.humidity*100 + "%",xPos, yPos);
+  yPos+=yGap;
+
+  textSize(textSizeSmall);
+  text("Wind",xPos, yPos);
+  yPos+=textSizeLarge;
+  textSize(textSizeLarge);
+  if (current.windBearing <22.5 || current.windBearing >(360-22.5)) {
+  	var direction = "N";
+  }
+  if (current.windBearing >22.5 || current.windBearing <(90-22.5)) {
+  	var direction = "NE";
+  }
+  else if (current.windBearing <(90-22.5) || current.windBearing >(90+22.5)) {
+  	var direction = "E";
+  }
+  else if (current.windBearing <(135-22.5) || current.windBearing >(135+22.5)) {
+  	var direction = "SE";
+  }
+  else if (current.windBearing <(180-22.5) || current.windBearing >(180+22.5)) {
+  	var direction = "S";
+  }
+  else if (current.windBearing <(225-22.5) || current.windBearing >(225+22.5)) {
+  	var direction = "SW";
+  }
+  else if (current.windBearing <(270-22.5) || current.windBearing >(270+22.5)) {
+  	var direction = "W";
+  }
+  else if (current.windBearing <(315-22.5) || current.windBearing >(315+22.5)) {
+  	var direction = "NW";
+  }
+  text(current.windSpeed + " mph " + direction,xPos, yPos);
+  yPos+=yGap;
+
+  textSize(textSizeSmall);
+  text("Cloud Cover",xPos, yPos);
+  yPos+=textSizeLarge;
+  textSize(textSizeLarge);
+  text(floor(current.cloudCover *100) + "%",xPos, yPos);
+  yPos+=yGap;
+
+console.log(13*sunrise.getHours(),yPos,13*sunset.getHours(), yPos+textSizeLarge);
+ 
+
+
+}
